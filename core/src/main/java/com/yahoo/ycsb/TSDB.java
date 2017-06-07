@@ -7,14 +7,14 @@ import java.util.Vector;
 
 public abstract class TSDB extends DB {
 
-  public static final String RECORD_ID_FIELD = "ts.record.id";
-  public static final String RECORD_ID_DEFAULT = "id";
-  public static final String RECORD_TS_FIELD = "ts.record.timestamp";
-  public static final String RECORD_TS_DEFAULT = "timestamp";
-  public static final String RECORD_KIND_FIELD = "ts.record.kind";
-  public static final String RECORD_KIND_DEFAULT = "kind";
-  public static final String RECORD_PAYLOAD_FIELD = "ts.record.payload";
-  public static final String RECORD_PAYLOAD_DEFAULT = "payload";
+  public static final String RECORD_ID_FIELD_PROPERTY = "ts.record.id";
+  public static final String DEFAULT_RECORD_ID_FIELD = "id";
+  public static final String RECORD_TS_FIELD_PROPERTY = "ts.record.timestamp";
+  public static final String DEFAULT_RECORD_TS_FIELD = "timestamp";
+  public static final String RECORD_KIND_FIELD_PROPERTY = "ts.record.kind";
+  public static final String DEFAULT_RECORD_KIND_FIELD = "kind";
+  public static final String RECORD_PAYLOAD_FIELD_PROPERTY = "ts.record.payload";
+  public static final String DEFAULT_RECORD_PAYLOAD_PROPETY = "payload";
 
   public static class TSRecord {
     private long id;
@@ -43,6 +43,11 @@ public abstract class TSDB extends DB {
 
     public String getPayload() {
       return payload;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("{id:%d,ts:%d,kind:'%s',payload:'%s'}", id, timestamp, kind, payload);
     }
   }
 

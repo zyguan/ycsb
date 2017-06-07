@@ -1,10 +1,8 @@
 package com.yahoo.ycsb.db;
 
-import com.sun.org.apache.regexp.internal.RE;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.TSDB;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.sql.*;
 import java.util.List;
@@ -13,26 +11,21 @@ import java.util.Properties;
 public class JdbcTSDBClient extends TSDB {
 
   private Connection conn;
-  private boolean autoCommit;
 
   private String fieldId;
   private String fieldTs;
   private String fieldKind;
   private String fieldPayload;
 
-  private String querySql;
-
   @Override
   public void init() throws DBException {
 
     Properties props = getProperties();
 
-    autoCommit = getBoolProperty(props, JdbcDBClient.JDBC_AUTO_COMMIT, true);
-
-    fieldId = props.getProperty(RECORD_ID_FIELD, RECORD_ID_DEFAULT);
-    fieldTs = props.getProperty(RECORD_ID_FIELD, RECORD_TS_DEFAULT);
-    fieldKind = props.getProperty(RECORD_KIND_FIELD, RECORD_KIND_DEFAULT);
-    fieldPayload = props.getProperty(RECORD_PAYLOAD_FIELD, RECORD_PAYLOAD_DEFAULT);
+    fieldId = props.getProperty(RECORD_ID_FIELD_PROPERTY, DEFAULT_RECORD_ID_FIELD);
+    fieldTs = props.getProperty(RECORD_TS_FIELD_PROPERTY, DEFAULT_RECORD_TS_FIELD);
+    fieldKind = props.getProperty(RECORD_KIND_FIELD_PROPERTY, DEFAULT_RECORD_KIND_FIELD);
+    fieldPayload = props.getProperty(RECORD_PAYLOAD_FIELD_PROPERTY, DEFAULT_RECORD_PAYLOAD_PROPETY);
 
     String driver = props.getProperty(JdbcDBClient.DRIVER_CLASS);
     String url = props.getProperty(JdbcDBClient.CONNECTION_URL);
@@ -45,11 +38,22 @@ public class JdbcTSDBClient extends TSDB {
         Class.forName(driver);
       }
       conn = DriverManager.getConnection(url, user, passwd);
+      conn.setAutoCommit(true);
     } catch (ClassNotFoundException e) {
       System.err.println("Error in initializing the JDBS driver: " + e);
       throw new DBException(e);
     } catch (SQLException e) {
       System.err.println("Error in database operation: " + e);
+      throw new DBException(e);
+    }
+  }
+
+  @Override
+  public void cleanup() throws DBException {
+    try {
+      conn.close();
+    } catch (SQLException e) {
+      System.err.println("Error in closing the connection. " + e);
       throw new DBException(e);
     }
   }
@@ -92,19 +96,44 @@ public class JdbcTSDBClient extends TSDB {
 
   @Override
   public Status insert(String table, TSRecord record) {
-    throw new NotImplementedException(); // TODO
+    StringBuilder insertSql = new StringBuilder("INSERT INTO ")
+        .append(table).append(" (")
+        .append(fieldId).append(",")
+        .append(fieldTs).append(",")
+        .append(fieldKind).append(",")
+        .append(fieldPayload).append(") VALUES (?,?,?,?)");
+    try {
+      PreparedStatement insertStmt = conn.prepareStatement(insertSql.toString());
+      insertStmt.setLong(1, record.getId());
+      insertStmt.setLong(2, record.getTimestamp());
+      insertStmt.setString(3,record.getKind());
+      insertStmt.setString(4, record.getPayload());
+
+      if (insertStmt.executeUpdate() != 1) {
+        return Status.UNEXPECTED_STATE;
+      }
+      return Status.OK;
+    } catch (SQLException e) {
+      System.err.println("Error in processing insert to table: " + table + e);
+      return Status.ERROR;
+    }
   }
 
   @Override
   public Status delete(String table, long id) {
-    throw new NotImplementedException(); // TODO
+    StringBuilder deleteSql = new StringBuilder("DELETE FROM ").append(table)
+        .append(" WHERE ").append(fieldId).append("=?");
+    try {
+      PreparedStatement deleteStmt = conn.prepareStatement(deleteSql.toString());
+      deleteStmt.setLong(1, id);
+      if (deleteStmt.executeUpdate() != 1) {
+        return Status.UNEXPECTED_STATE;
+      }
+      return Status.OK;
+    } catch (SQLException e) {
+      System.err.println("Error in processing delete to table: " + table + e);
+      return Status.ERROR;
+    }
   }
 
-  private static boolean getBoolProperty(Properties props, String key, boolean defaultVal) {
-    String valueStr = props.getProperty(key);
-    if (valueStr != null) {
-      return Boolean.parseBoolean(valueStr);
-    }
-    return defaultVal;
-  }
 }
