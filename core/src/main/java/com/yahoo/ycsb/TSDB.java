@@ -7,13 +7,13 @@ import java.util.*;
  */
 public abstract class TSDB extends DB {
 
-  public static final String RECORD_ID_FIELD_PROPERTY = "ts.record.id";
+  public static final String RECORD_ID_FIELD_PROPERTY = "tsrecord.id.field";
   public static final String DEFAULT_RECORD_ID_FIELD = "id";
-  public static final String RECORD_TS_FIELD_PROPERTY = "ts.record.timestamp";
+  public static final String RECORD_TS_FIELD_PROPERTY = "tsrecord.timestamp.field";
   public static final String DEFAULT_RECORD_TS_FIELD = "timestamp";
-  public static final String RECORD_KIND_FIELD_PROPERTY = "ts.record.kind";
+  public static final String RECORD_KIND_FIELD_PROPERTY = "tsrecord.kind.field";
   public static final String DEFAULT_RECORD_KIND_FIELD = "kind";
-  public static final String RECORD_PAYLOAD_FIELD_PROPERTY = "ts.record.payload";
+  public static final String RECORD_PAYLOAD_FIELD_PROPERTY = "tsrecord.payload.field";
   public static final String DEFAULT_RECORD_PAYLOAD_PROPETY = "payload";
 
   /**
