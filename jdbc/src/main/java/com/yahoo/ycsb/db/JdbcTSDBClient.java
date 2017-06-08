@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * TODO.
+ */
 public class JdbcTSDBClient extends TSDB {
 
   private Connection conn;
@@ -106,7 +109,7 @@ public class JdbcTSDBClient extends TSDB {
       PreparedStatement insertStmt = conn.prepareStatement(insertSql.toString());
       insertStmt.setLong(1, record.getId());
       insertStmt.setLong(2, record.getTimestamp());
-      insertStmt.setString(3,record.getKind());
+      insertStmt.setString(3, record.getKind());
       insertStmt.setString(4, record.getPayload());
 
       if (insertStmt.executeUpdate() != 1) {

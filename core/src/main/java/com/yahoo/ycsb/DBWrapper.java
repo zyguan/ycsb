@@ -62,6 +62,10 @@ public class DBWrapper extends DB {
     scopeStringUpdate = simple + "#update";
   }
 
+  public DB getInternalDB() {
+    return db;
+  }
+
   /**
    * Set the properties for this DB.
    */

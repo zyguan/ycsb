@@ -1,10 +1,10 @@
 package com.yahoo.ycsb;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
+/**
+ * TODO.
+ */
 public abstract class TSDB extends DB {
 
   public static final String RECORD_ID_FIELD_PROPERTY = "ts.record.id";
@@ -16,6 +16,9 @@ public abstract class TSDB extends DB {
   public static final String RECORD_PAYLOAD_FIELD_PROPERTY = "ts.record.payload";
   public static final String DEFAULT_RECORD_PAYLOAD_PROPETY = "payload";
 
+  /**
+   * TODO.
+   */
   public static class TSRecord {
     private long id;
     private long timestamp;
@@ -49,6 +52,21 @@ public abstract class TSDB extends DB {
     public String toString() {
       return String.format("{id:%d,ts:%d,kind:'%s',payload:'%s'}", id, timestamp, kind, payload);
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof TSRecord)) {
+        return false;
+      }
+      TSRecord that = (TSRecord) o;
+      return this.id == that.id && this.timestamp == that.timestamp &&
+          this.kind.equals(that.kind) && this.payload.equals(that.payload);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(toString());
+    }
   }
 
   @Override
@@ -57,7 +75,8 @@ public abstract class TSDB extends DB {
   }
 
   @Override
-  public Status scan(String table, String startkey, int recordcount, Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
+  public Status scan(String table, String startkey, int recordcount, Set<String> fields,
+                     Vector<HashMap<String, ByteIterator>> result) {
     throw new UnsupportedOperationException("TSDB doesn't support generic scan");
   }
 

@@ -19,6 +19,10 @@ package com.yahoo.ycsb.generator;
 
 import org.testng.annotations.Test;
 
+import java.util.Map;
+import java.util.TreeMap;
+
+import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
 
@@ -29,11 +33,19 @@ public class TestZipfianGenerator {
         long max = 10;
         ZipfianGenerator zipfian = new ZipfianGenerator(min, max);
 
+        Map<Long, Integer> cnts = new TreeMap<>();
+        for (long i = min; i <= max; i++) {
+            cnts.put(i, 0);
+        }
         for (int i = 0; i < 10000; i++) {
             long rnd = zipfian.nextValue();
+            cnts.put(rnd, cnts.get(rnd)+1);
             assertFalse(rnd < min);
             assertFalse(rnd > max);
         }
-
+        long n = min;
+        for (Map.Entry<Long, Integer> e : cnts.entrySet()) {
+            assertEquals(n++, (long) e.getKey());
+        }
     }
 }
