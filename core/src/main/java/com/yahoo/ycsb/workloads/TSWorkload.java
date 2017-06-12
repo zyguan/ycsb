@@ -130,15 +130,17 @@ public class TSWorkload extends Workload {
   }
 
   boolean doTxnQuery(TSDB db) {
-    long t = initTs + Utils.random().nextInt((int) Math.round(step*(insCntLoad + insCntRun.get())));
     long d = Math.round(.5 * queryWind);
+    long t = initTs+d + Utils.random().nextInt((int) Math.round(step*(insCntLoad + insCntRun.get())-queryWind));
 
-    long startTime = System.nanoTime();
+    long st = System.nanoTime();
 
     Status status = db.query(table, t-d, t+d,
         TSRecordGenerator.nthKind(Utils.random().nextInt(nKinds)), null);
 
-    measurements.measure("QUERY", (int) (System.nanoTime()-startTime)/1000);
+    long en = System.nanoTime();
+
+    measurements.measure("QUERY", (int) ((en - st) / 1000));
     measurements.reportStatus("QUERY", status);
 
     return status != null && status.isOk();
