@@ -667,8 +667,8 @@ public final class Client {
       String exporterStr = props.getProperty(EXPORTER_PROPERTY,
           "com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter");
       try {
-        exporter = (MeasurementsExporter) Class.forName(exporterStr).getConstructor(OutputStream.class)
-            .newInstance(out);
+        exporter = (MeasurementsExporter) Class.forName(exporterStr)
+            .getConstructor(OutputStream.class, Properties.class).newInstance(out, props);
       } catch (Exception e) {
         System.err.println("Could not find exporter " + exporterStr
             + ", will use default text reporter.");

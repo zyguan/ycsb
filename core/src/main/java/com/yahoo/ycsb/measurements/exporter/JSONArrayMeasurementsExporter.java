@@ -24,6 +24,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Properties;
 
 /**
  * Export measurements into a machine readable JSON Array of measurement objects.
@@ -31,6 +32,10 @@ import java.io.OutputStreamWriter;
 public class JSONArrayMeasurementsExporter implements MeasurementsExporter {
   private final JsonFactory factory = new JsonFactory();
   private JsonGenerator g;
+
+  public JSONArrayMeasurementsExporter(OutputStream os, Properties props) throws IOException {
+    this(os);
+  }
 
   public JSONArrayMeasurementsExporter(OutputStream os) throws IOException {
     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));

@@ -20,12 +20,17 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Properties;
 
 /**
  * Write human readable text. Tries to emulate the previous print report method.
  */
 public class TextMeasurementsExporter implements MeasurementsExporter {
   private final BufferedWriter bw;
+
+  public TextMeasurementsExporter(OutputStream os, Properties props) {
+    this(os);
+  }
 
   public TextMeasurementsExporter(OutputStream os) {
     this.bw = new BufferedWriter(new OutputStreamWriter(os));
