@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TSWorkload extends Workload {
 
   public static final String TABLENAME_PROPERTY = "table";
-  public static final String DEFAULT_TABLENAME_PROPERTY = "t_record";
+  public static final String DEFAULT_TABLENAME = "t_record";
   protected String table;
 
   public static final String RECORD_NO_KINDS_PROPERTY = "tsrecord.kind.size";
@@ -61,7 +61,7 @@ public class TSWorkload extends Workload {
 
   @Override
   public void init(Properties p) throws WorkloadException {
-    table = p.getProperty(TABLENAME_PROPERTY, DEFAULT_TABLENAME_PROPERTY);
+    table = p.getProperty(TABLENAME_PROPERTY, DEFAULT_TABLENAME);
     nKinds = Integer.parseInt(p.getProperty(RECORD_NO_KINDS_PROPERTY, DEFAULT_RECORD_NO_KINDS));
 
     initId = Long.parseLong(p.getProperty(RECORD_INIT_ID_PROPERTY, DEFAULT_RECORD_INIT_ID));

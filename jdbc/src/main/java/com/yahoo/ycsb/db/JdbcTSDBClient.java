@@ -3,10 +3,13 @@ package com.yahoo.ycsb.db;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.TSDB;
+import com.yahoo.ycsb.workloads.TSWorkload;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * TODO.
@@ -19,6 +22,12 @@ public class JdbcTSDBClient extends TSDB {
   private String fieldTs;
   private String fieldKind;
   private String fieldPayload;
+
+  public static final String TSDB_BATCHSIZE_PROPERTY = "tsdb.batchsize";
+  public static final String DEFAULT_TSDB_BATCHSIZE = "2000";
+  protected int batchSize;
+
+  protected ConcurrentLinkedQueue<TSRecord> cachedRecords;
 
   @Override
   public void init() throws DBException {
@@ -35,6 +44,8 @@ public class JdbcTSDBClient extends TSDB {
     String user = props.getProperty(JdbcDBClient.CONNECTION_USER);
     String passwd = props.getProperty(JdbcDBClient.CONNECTION_PASSWD);
 
+    cachedRecords = new ConcurrentLinkedQueue<>();
+    batchSize = Integer.parseInt(props.getProperty(TSDB_BATCHSIZE_PROPERTY, DEFAULT_TSDB_BATCHSIZE));
 
     try {
       if (driver != null) {
@@ -54,6 +65,8 @@ public class JdbcTSDBClient extends TSDB {
   @Override
   public void cleanup() throws DBException {
     try {
+      String table =   getProperties().getProperty(TSWorkload.TABLENAME_PROPERTY, TSWorkload.DEFAULT_TABLENAME);
+      insertRecords(table, new ArrayList<>(cachedRecords));
       conn.close();
     } catch (SQLException e) {
       System.err.println("Error in closing the connection. " + e);
@@ -99,27 +112,58 @@ public class JdbcTSDBClient extends TSDB {
 
   @Override
   public Status insert(String table, TSRecord record) {
+    List<TSRecord> records;
+    if (batchSize <= 1) {
+      records = new ArrayList<>();
+      records.add(record);
+    } else {
+      cachedRecords.offer(record);
+      if (cachedRecords.size() < batchSize) {
+        return Status.BATCHED_OK;
+      }
+
+      records = new ArrayList<>(batchSize);
+      while (cachedRecords.size() > 0 && records.size() < batchSize) {
+        TSRecord r = cachedRecords.poll();
+        if (r == null) {
+          break;
+        }
+        records.add(r);
+      }
+    }
+
+    try {
+      return insertRecords(table, records);
+    } catch (SQLException e) {
+      System.err.println("Error in processing insert to table(" + table + "): " + e);
+      return Status.ERROR;
+    }
+  }
+
+  private Status insertRecords(String table, List<TSRecord> records) throws SQLException {
+    if (records.size() == 0) {
+      return Status.OK;
+    }
     StringBuilder insertSql = new StringBuilder("INSERT INTO ")
         .append(table).append(" (")
         .append(fieldId).append(",")
         .append(fieldTs).append(",")
         .append(fieldKind).append(",")
         .append(fieldPayload).append(") VALUES (?,?,?,?)");
-    try {
-      PreparedStatement insertStmt = conn.prepareStatement(insertSql.toString());
-      insertStmt.setLong(1, record.getId());
-      insertStmt.setLong(2, record.getTimestamp());
-      insertStmt.setString(3, record.getKind());
-      insertStmt.setString(4, record.getPayload());
-
-      if (insertStmt.executeUpdate() != 1) {
-        return Status.UNEXPECTED_STATE;
-      }
-      return Status.OK;
-    } catch (SQLException e) {
-      System.err.println("Error in processing insert to table: " + table + e);
+    for (int i = 1; i < records.size(); i++) {
+      insertSql.append(",(?,?,?,?)");
+    }
+    PreparedStatement insertStmt = conn.prepareStatement(insertSql.toString());
+    for (int i = 0; i < records.size(); i++) {
+      insertStmt.setLong(1+i*4, records.get(i).getId());
+      insertStmt.setLong(2+i*4, records.get(i).getTimestamp());
+      insertStmt.setString(3+i*4, records.get(i).getKind());
+      insertStmt.setString(4+i*4, records.get(i).getPayload());
+    }
+    if (insertStmt.executeUpdate() != records.size()) {
       return Status.ERROR;
     }
+    return Status.OK;
   }
 
   @Override

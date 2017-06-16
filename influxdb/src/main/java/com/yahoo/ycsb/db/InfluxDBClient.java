@@ -6,13 +6,15 @@ import com.yahoo.ycsb.TSDB;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
-import org.influxdb.dto.Query;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * TODO.
+ */
 public class InfluxDBClient extends TSDB {
 
   private InfluxDB db;
@@ -58,28 +60,29 @@ public class InfluxDBClient extends TSDB {
 
   @Override
   public void cleanup() throws DBException {
+    db.flush();
     db.close();
   }
 
   @Override
   public Status query(String table, long start, long end, String kind, List<TSRecord> result) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("TO BE IMPLEMEMTED");
   }
 
   @Override
   public Status insert(String table, TSRecord record) {
     Point p = Point.measurement(table)
         .time(record.getTimestamp(), TimeUnit.SECONDS)
-        .addField(fieldId, record.getId())
-        .addField(fieldKind, record.getKind())
+        .tag(fieldKind, record.getKind())
+        .addField(fieldId, String.valueOf(record.getId()))  // https://github.com/influxdata/influxdb/issues/3471
         .addField(fieldPayload, record.getPayload())
         .build();
     db.write(dbName, "autogen", p);
-    return Status.OK;
+    return Status.BATCHED_OK;
   }
 
   @Override
   public Status delete(String table, long id) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("TO BE IMPLEMEMTED");
   }
 }
