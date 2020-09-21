@@ -39,6 +39,7 @@ LICENSE file.
       <artifactId>core</artifactId>
       <version>${project.version}</version>
     </dependency>
+<!--
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>accumulo1.9-binding</artifactId>
@@ -174,11 +175,13 @@ LICENSE file.
       <artifactId>infinispan-binding</artifactId>
       <version>${project.version}</version>
     </dependency>
+-->
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>jdbc-binding</artifactId>
       <version>${project.version}</version>
     </dependency>
+<!--
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>kudu-binding</artifactId>
@@ -224,11 +227,13 @@ LICENSE file.
       <artifactId>rados-binding</artifactId>
       <version>${project.version}</version>
     </dependency>
+-->
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>redis-binding</artifactId>
       <version>${project.version}</version>
     </dependency>
+<!--
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>rest-binding</artifactId>
@@ -269,18 +274,24 @@ LICENSE file.
         <artifactId>tablestore-binding</artifactId>
         <version>${project.version}</version>
     </dependency>
+-->
+    <dependency>
+      <groupId>site.ycsb</groupId>
+      <artifactId>tikv-binding</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 <!--
     <dependency>
       <groupId>site.ycsb</groupId>
       <artifactId>voldemort-binding</artifactId>
       <version>${project.version}</version>
     </dependency>
--->
     <dependency>
        <groupId>site.ycsb</groupId>
        <artifactId>voltdb-binding</artifactId>
        <version>${project.version}</version>
      </dependency>
+-->
 
     <dependency>
        <groupId>site.ycsb</groupId>
@@ -288,6 +299,7 @@ LICENSE file.
        <version>${project.version}</version>
      </dependency>
 
+<!--
     <dependency>
        <groupId>site.ycsb</groupId>
        <artifactId>yugabyteSQL-binding</artifactId>
@@ -299,6 +311,7 @@ LICENSE file.
        <artifactId>yugabyteSQL2Keys-binding</artifactId>
        <version>${project.version}</version>
      </dependency>
+-->
 
   </dependencies>
   <build>
@@ -323,7 +336,6 @@ LICENSE file.
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
   <profiles>
